@@ -37,6 +37,22 @@ def input_data_fixture():
     yield input_json
 
 
+@pytest.fixture(name="default_data")
+def default_data_fixture():
+    """Fixture for default data"""
+    data_json = {
+        "azureGuestAgentPolicy": {
+            "policyVersion": "0.1.0",
+            "signingRules": {
+                "extensionSigned": False
+            },
+            "allowListOnly": False
+        }
+    }
+    data_json = json.dumps(data_json)
+    yield data_json
+
+
 def test_default_data_json(engine, input_data):
     """Test the default data in json format for extension policy."""
     data_json = {
@@ -85,38 +101,114 @@ def test_allow_all(engine, input_data):
     assert results['result'][0]['expressions'][0]['value']['extensions_to_download'][TEST_EXT_NAME]['downloadAllowed']
 
 
-def test_allow_signed(engine):
-    """Allow only signed extensions"""
+def test_name_only_input(engine, default_data):
+    """Test input with only the extension name."""
+    input_data = {
+        "extensions": {
+            TEST_EXT_NAME: {
+            }
+        }
+    }
+    input_json = json.dumps(input_data)
+    engine.add_data_json(default_data)
+    engine.set_input_json(input_json)
+    # Eval query
+    results = engine.eval_query('data.agent_extension_policy')
+    assert results['result'][0]['expressions'][0]['value']['extensions_to_download'][TEST_EXT_NAME]['downloadAllowed']
+
+
+@pytest.mark.parametrize("input_signed, extension_signed", [
+    (True, True),
+    (True, False),
+    (False, True),
+    (False, False)
+])
+def test_extension_signed_rule(engine, input_signed, extension_signed):
+    """
+    Test extension signing rule. Engine should be able to handle
+    both signed and unsigned extensions, with extensionSigned rule set
+    to either true or false.
+    """
     data_json = {
         "azureGuestAgentPolicy": {
             "policyVersion": "0.1.0",
             "signingRules": {
-                "extensionSigned": True
+                "extensionSigned": extension_signed
             },
             "allowListOnly": False
         }
     }
-    data_json = json.dumps(data_json)
-    engine.add_data_json(data_json)
     input_data = {
         "extensions": {
             TEST_EXT_NAME: {
                 "signingInfo": {
-                    "extensionSigned": True
+                    "extensionSigned": input_signed
                 }
-            },
-            TEST_EXT_NAME + "2": {
+            }
+        }
+    }
+    data_json = json.dumps(data_json)
+    input_data = json.dumps(input_data)
+    engine.add_data_json(data_json)
+    engine.set_input_json(input_data)
+    # Eval query
+    results = engine.eval_query('data.agent_extension_policy')
+
+    # assert results
+    if extension_signed:
+        assert results['result'][0]['expressions'][0]['value']['extensions_validated'][TEST_EXT_NAME]['signingValidated'] == input_signed
+    else:
+        assert results['result'][0]['expressions'][0]['value']['extensions_validated'][TEST_EXT_NAME]['signingValidated']
+    assert results['result'][0]['expressions'][0]['value']['extensions_to_download'][TEST_EXT_NAME]['downloadAllowed']
+
+
+@pytest.mark.parametrize("ext_allowed, allow_rule", [
+    (True, True),
+    (True, False),
+    (False, True),
+    (False, False)
+])
+def test_allowlist_rule(engine, ext_allowed, allow_rule):
+    """
+    Test allowListOnly rule. Engine should be able to handle
+    both allowed and disallowed extensions, with allowListOnly rule
+    set to either true or false.
+    """
+    if ext_allowed:
+        ext_name = TEST_EXT_NAME
+    else:
+        ext_name = "random_disallowed_extension"
+
+    input_json = {
+        "extensions": {
+            ext_name: {
                 "signingInfo": {
                     "extensionSigned": False
                 }
             }
         }
     }
-    input_data = json.dumps(input_data)
-    engine.set_input_json(input_data)
+    data_json = {
+        "azureGuestAgentPolicy": {
+            "signingRules": {
+                "extensionSigned": False
+            },
+            "allowListOnly": allow_rule
+        },
+        "azureGuestExtensionsPolicy": {
+            "Microsoft.CPlat.Core.RunCommandLinux": {
+            },
+            TEST_EXT_NAME: {
+            }
+        }
+    }
+    input_json = json.dumps(input_json)
+    data_json = json.dumps(data_json)
+    engine.add_data_json(data_json)
+    engine.set_input_json(input_json)
     # Eval query
     results = engine.eval_query('data.agent_extension_policy')
-    print(results)
-    print(input_data)
-    assert results['result'][0]['expressions'][0]['value']['extensions_validated'][TEST_EXT_NAME]['signingValidated']
-    assert not results['result'][0]['expressions'][0]['value']['extensions_validated'][TEST_EXT_NAME + "2"]['signingValidated']
+    if allow_rule:
+        assert results['result'][0]['expressions'][0]['value']['extensions_to_download'][ext_name]['downloadAllowed'] == ext_allowed
+    else:
+        assert results['result'][0]['expressions'][0]['value']['extensions_to_download'][ext_name]['downloadAllowed']
