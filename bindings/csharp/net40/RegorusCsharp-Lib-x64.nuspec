@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>RegorusCsharp-Lib-x64</id>
-    <version>0.0.3</version>
+    <version>0.2.1</version>
     <title>RegorusCsharp-Lib-x64</title>
     <authors>yangjie@microsoft.com</authors>
     <owners>yangjie@microsoft.com</owners>
@@ -17,5 +17,6 @@
     <file src="RegorusFFI.g.cs" target="RegorusFFI.g.cs"/>
     <file src="regorus_ffi.dll" target="lib\regorusc.dll" />
     <file src="README" target="README" />
+    <file src="..\..\..\LICENSE" target="LICENSE" />
   </files>
 </package>

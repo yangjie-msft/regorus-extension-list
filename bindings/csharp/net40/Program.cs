@@ -1,4 +1,13 @@
-﻿using System;
+﻿//-----------------------------------------------------------------------
+// <copyright file="Program.cs" company="Microsoft">
+//    Copyright (c)2012 Microsoft. All rights reserved.
+// </copyright>
+// <summary>
+//    Contains code to test the Regorus Policy Engine base class for C#
+// and .NET4.0 bindings. It can be built and tested in Windows only. 
+// </summary>
+//-----------------------------------------------------------------------
+using System;
 using System.Text;
 
 using System.Diagnostics;

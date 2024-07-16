@@ -1,4 +1,14 @@
-﻿using System.Diagnostics;
+﻿//-----------------------------------------------------------------------
+// <copyright file="Program.cs" company="Microsoft">
+//    Copyright (c)2012 Microsoft. All rights reserved.
+// </copyright>
+// <summary>
+//    Contains code to test the Regorus class for C#
+// and .NET 8.0 bindings. 
+// </summary>
+//-----------------------------------------------------------------------
+
+using System.Diagnostics;
 
 long nanosecPerTick = (1000L*1000L*1000L) / Stopwatch.Frequency;
 var w = new Stopwatch();

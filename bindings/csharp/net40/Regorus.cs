@@ -4,7 +4,7 @@
 // </copyright>
 // <summary>
 //    Contains code for the Regorus Policy Engine base class for C# and
-// .NET4.6 bindings. Currently this base class is not thread-safe. Make 
+// .NET4.0 bindings. Currently this base class is not thread-safe. Make 
 // sure we use it in a signle-threaded environment or add additional 
 // protection when using it. 
 // </summary>

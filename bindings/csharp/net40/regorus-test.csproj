@@ -7,7 +7,6 @@
         <RegorusDylib Include="..\..\..\target\release\*regorus_ffi*" />
     </ItemGroup>    
     <Copy SourceFiles="@(RegorusDylib)" DestinationFolder="." />
-    <Copy SourceFiles=".\regorus_ffi.dll"  DestinationFiles="$(OutDir)regorusc.dll" />
   </Target>
 
 
